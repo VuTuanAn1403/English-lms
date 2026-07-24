@@ -1,5 +1,5 @@
 services:
-  # ==================== Infrastructure ====================
+  # ==================== 1. Infrastructure Services ====================
 
   discovery-server:
     build: ./discovery-server
@@ -7,10 +7,11 @@ services:
     ports:
       - "8761:8761"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 30s
     networks:
       - english-lms-network
 
@@ -23,10 +24,11 @@ services:
       discovery-server:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 30s
     environment:
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
     networks:
@@ -42,13 +44,19 @@ services:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     environment:
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
     networks:
       - english-lms-network
 
-  # ==================== Databases ====================
+  # ==================== 2. Databases (PostgreSQL per Service) ====================
 
   postgres-user:
     image: postgres:16-alpine
@@ -107,7 +115,7 @@ services:
     networks:
       - english-lms-network
 
-  # ==================== Business Services ====================
+  # ==================== 3. Business Microservices ====================
 
   user-service:
     build: ./user-service
@@ -121,6 +129,12 @@ services:
         condition: service_healthy
       postgres-user:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     environment:
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
@@ -142,6 +156,12 @@ services:
         condition: service_healthy
       postgres-course:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     environment:
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
@@ -163,6 +183,12 @@ services:
         condition: service_healthy
       postgres-ai:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     environment:
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
       - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
@@ -173,19 +199,20 @@ services:
     networks:
       - english-lms-network
 
-  # ==================== Frontend ====================
+  # ==================== 4. React Frontend ====================
 
-  # frontend:
-  #   build: ./frontend
-  #   container_name: react-app
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - api-gateway
-  #   networks:
-  #     - english-lms-network
+  frontend:
+    build: ./frontend
+    container_name: react-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - english-lms-network
 
-# ==================== Networks & Volumes ====================
+# ==================== Networks & Named Volumes ====================
 
 networks:
   english-lms-network:
