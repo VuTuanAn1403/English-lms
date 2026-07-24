@@ -1,0 +1,197 @@
+services:
+  # ==================== Infrastructure ====================
+
+  discovery-server:
+    build: ./discovery-server
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - english-lms-network
+
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    networks:
+      - english-lms-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+    networks:
+      - english-lms-network
+
+  # ==================== Databases ====================
+
+  postgres-user:
+    image: postgres:16-alpine
+    container_name: postgres-user
+    environment:
+      - POSTGRES_DB=user_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - user-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d user_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - english-lms-network
+
+  postgres-course:
+    image: postgres:16-alpine
+    container_name: postgres-course
+    environment:
+      - POSTGRES_DB=course_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - course-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d course_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - english-lms-network
+
+  postgres-ai:
+    image: postgres:16-alpine
+    container_name: postgres-ai
+    environment:
+      - POSTGRES_DB=ai_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - ai-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - english-lms-network
+
+  # ==================== Business Services ====================
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      postgres-user:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-user:5432/user_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    networks:
+      - english-lms-network
+
+  course-service:
+    build: ./course-service
+    container_name: course-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      postgres-course:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-course:5432/course_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    networks:
+      - english-lms-network
+
+  ai-service:
+    build: ./ai-service
+    container_name: ai-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      postgres-ai:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-ai:5432/ai_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    networks:
+      - english-lms-network
+
+  # ==================== Frontend ====================
+
+  # frontend:
+  #   build: ./frontend
+  #   container_name: react-app
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - api-gateway
+  #   networks:
+  #     - english-lms-network
+
+# ==================== Networks & Volumes ====================
+
+networks:
+  english-lms-network:
+    driver: bridge
+
+volumes:
+  user-data:
+  course-data:
+  ai-data:
