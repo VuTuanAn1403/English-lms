@@ -1,0 +1,23 @@
+# API Gateway Configuration (served by Config Server)
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/auth/**, /api/v1/users/**, /user/**
+        - id: course-service
+          uri: lb://course-service
+          predicates:
+            - Path=/api/v1/courses/**, /api/v1/lessons/**, /api/v1/enrollments/**, /api/v1/admin/enrollments/**, /api/v1/admin/revenue/**, /api/v1/admin/orders/**, /api/v1/orders/**, /api/v1/payments/**, /api/v1/progress/**, /course/**
+        - id: ai-service
+          uri: lb://ai-service
+          predicates:
+            - Path=/api/v1/ai/**, /ai/**
+
+jwt:
+  secret: english-lms-jwt-secret-key-must-be-at-least-256-bits-long-for-security
+
+gateway:
+  open-endpoints: "/api/v1/auth/register,/api/v1/auth/login,/api/v1/courses,/api/v1/courses/**,/api/v1/lessons,/api/v1/lessons/**,/api/v1/payments/vnpay/**,/user/auth/**,/user/login,/user/register,/course/public/**,/eureka/**,/actuator/**"
