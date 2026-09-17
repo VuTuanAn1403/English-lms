@@ -18,6 +18,6 @@ public interface LearningProgressRepository extends JpaRepository<LearningProgre
     long countByUserIdAndCompletedTrue(UUID userId);
     void deleteByLessonId(UUID lessonId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT lp.userId, lp.courseId, COUNT(lp) FROM LearningProgress lp WHERE lp.completed = true GROUP BY lp.userId, lp.courseId")
+    @org.springframework.data.jpa.repository.Query("SELECT lp.userId, lp.course.id, COUNT(lp) FROM LearningProgress lp WHERE lp.completed = true GROUP BY lp.userId, lp.course.id")
     List<Object[]> countCompletedGroupByUserIdAndCourseId();
 }
