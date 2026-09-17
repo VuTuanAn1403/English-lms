@@ -2,9 +2,9 @@ name: Security & Secret Hygiene CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master, develop, 'feature/**' ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
 
 permissions:
   contents: read
