@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Container, Typography, Grid, Box, TextField, InputAdornment, MenuItem, Select, FormControl, InputLabel, Alert, Button } from '@mui/material';
 import { Search as SearchIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 import CourseCard from '../components/CourseCard';
@@ -19,7 +20,7 @@ const Courses = () => {
       setCourses(res.data?.data || []);
     } catch (err) {
       console.error('Error fetching courses:', err);
-      setError('Không thể kết nối đến máy chủ khóa học. Vui lòng kiểm tra kết nối và thử lại.');
+      setError('Không thể tải dữ liệu khóa học.');
       setCourses([]);
     } finally {
       setLoading(false);
@@ -42,7 +43,8 @@ const Courses = () => {
   };
 
   const filteredCourses = courses.filter((c) => {
-    const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase()) || (c.description && c.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch = (c.title || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (c.description && c.description.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesSearch && matchesLevel(c.level, selectedLevel);
   });
 
@@ -115,13 +117,13 @@ const Courses = () => {
             </Grid>
           ))}
         </Grid>
-      ) : (
+      ) : !error ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary">
             Không tìm thấy khóa học nào phù hợp với bộ lọc của bạn.
           </Typography>
         </Box>
-      )}
+      ) : null}
     </Container>
   );
 };

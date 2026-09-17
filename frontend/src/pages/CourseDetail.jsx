@@ -11,7 +11,8 @@ import {
   Lock as LockIcon,
   ShoppingCart as CartIcon,
   EmojiEvents as TrophyIcon,
-  LocalOffer as OfferIcon
+  LocalOffer as OfferIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import LessonCard from '../components/LessonCard';
 import Loading from '../components/Loading';
@@ -39,11 +40,12 @@ const CourseDetail = () => {
 
   const fetchCourseDetail = async () => {
     setLoading(true);
+    setErrorMsg('');
     try {
       const res = await api.get(`/api/v1/courses/${id}`);
       setCourse(res.data?.data || null);
 
-      const lessonRes = await api.get(`/api/v1/courses/${id}/lessons`);
+      const lessonRes = await api.get(`/api/v1/courses/${id}/lessons`).catch(() => ({ data: { data: [] } }));
       setLessons(lessonRes.data?.data || []);
 
       const countRes = await api.get(`/api/v1/courses/${id}/enrolled-count`).catch(() => ({ data: { data: 0 } }));
@@ -65,7 +67,8 @@ const CourseDetail = () => {
         }
       }
     } catch (err) {
-      setErrorMsg('Không thể nạp thông tin khóa học.');
+      console.error('Error loading course detail:', err);
+      setErrorMsg('Không thể tải dữ liệu khóa học.');
     } finally {
       setLoading(false);
     }
@@ -114,8 +117,18 @@ const CourseDetail = () => {
   if (!course) {
     return (
       <Container sx={{ py: 8 }}>
-        <Alert severity="warning">Không tìm thấy khóa học yêu cầu.</Alert>
-        <Button startIcon={<BackIcon />} onClick={() => navigate('/courses')} sx={{ mt: 2 }}>
+        <Alert
+          severity={errorMsg ? 'error' : 'warning'}
+          sx={{ mb: 3, borderRadius: 2 }}
+          action={
+            <Button color="inherit" size="small" startIcon={<RefreshIcon />} onClick={fetchCourseDetail}>
+              Thử lại
+            </Button>
+          }
+        >
+          {errorMsg || 'Không tìm thấy khóa học yêu cầu.'}
+        </Alert>
+        <Button startIcon={<BackIcon />} onClick={() => navigate('/courses')}>
           Quay về danh sách khóa học
         </Button>
       </Container>

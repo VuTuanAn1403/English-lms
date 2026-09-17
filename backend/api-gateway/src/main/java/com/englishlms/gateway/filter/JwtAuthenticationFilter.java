@@ -133,6 +133,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 pathMatcher.match("/api/v1/courses/*", path) ||
                 pathMatcher.match("/api/v1/courses/*/lessons", path) ||
                 pathMatcher.match("/api/v1/courses/*/enrolled-count", path) ||
+                pathMatcher.match("/api/v1/courses/*/access", path) ||
                 pathMatcher.match("/api/v1/lessons", path) ||
                 pathMatcher.match("/api/v1/lessons/*", path) ||
                 pathMatcher.match("/courses/**", path) ||

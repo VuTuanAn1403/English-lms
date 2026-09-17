@@ -46,7 +46,22 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: resData.message || 'Đăng nhập thất bại' };
       }
     } catch (error) {
-      const msg = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!';
+      if (!error.response) {
+        return {
+          success: false,
+          message: 'Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra kết nối mạng hoặc cấu hình Backend URL!'
+        };
+      }
+      const status = error.response.status;
+      const backendMsg = error.response.data?.message;
+      let msg = backendMsg;
+      if (!msg) {
+        if (status === 400) msg = 'Thông tin đăng nhập không hợp lệ!';
+        else if (status === 401) msg = 'Email hoặc mật khẩu không chính xác!';
+        else if (status === 403) msg = 'Tài khoản của bạn đã bị khóa hoặc không có quyền truy cập!';
+        else if (status >= 500) msg = 'Máy chủ đang gặp sự cố. Vui lòng thử lại sau ít phút!';
+        else msg = 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!';
+      }
       return { success: false, message: msg };
     } finally {
       setLoading(false);
@@ -60,7 +75,21 @@ export const AuthProvider = ({ children }) => {
       const resData = response.data;
       return { success: resData.success, message: resData.message || 'Đăng ký thành công' };
     } catch (error) {
-      const msg = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại!';
+      if (!error.response) {
+        return {
+          success: false,
+          message: 'Không thể kết nối đến máy chủ đăng ký. Vui lòng kiểm tra kết nối mạng hoặc cấu hình Backend URL!'
+        };
+      }
+      const status = error.response.status;
+      const backendMsg = error.response.data?.message;
+      let msg = backendMsg;
+      if (!msg) {
+        if (status === 400) msg = 'Dữ liệu đăng ký không hợp lệ!';
+        else if (status === 409) msg = 'Email này đã được đăng ký trên hệ thống!';
+        else if (status >= 500) msg = 'Máy chủ đang gặp sự cố. Vui lòng thử lại sau ít phút!';
+        else msg = 'Đăng ký thất bại. Vui lòng thử lại!';
+      }
       return { success: false, message: msg };
     } finally {
       setLoading(false);

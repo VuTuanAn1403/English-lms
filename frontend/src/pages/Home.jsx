@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Container, Typography, Button, Grid, Paper, Stack, Card, CardContent } from '@mui/material';
+import { Box, Container, Typography, Button, Grid, Paper, Stack, Card, CardContent, CircularProgress } from '@mui/material';
 import {
   School as SchoolIcon,
   SmartToy as AiIcon,
@@ -61,41 +61,46 @@ const Home = () => {
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 <Button
                   variant="contained"
+                  color="secondary"
                   size="large"
-                  onClick={() => navigate('/courses')}
                   startIcon={<PlayIcon />}
-                  sx={{ bgcolor: 'white', color: 'primary.main', fontWeight: 800, px: 4, py: 1.5, '&:hover': { bgcolor: '#F8FAFC' } }}
+                  onClick={() => navigate('/courses')}
+                  sx={{ py: 1.5, px: 4, fontWeight: 700, borderRadius: 3, boxShadow: '0 10px 25px rgba(16, 185, 129, 0.4)' }}
                 >
                   Khám phá khóa học
                 </Button>
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => navigate('/ai-assistant')}
                   startIcon={<AiIcon />}
-                  sx={{ borderColor: 'white', color: 'white', fontWeight: 700, px: 4, py: 1.5, '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)' } }}
+                  onClick={() => navigate('/ai-assistant')}
+                  sx={{
+                    py: 1.5,
+                    px: 3,
+                    fontWeight: 600,
+                    borderRadius: 3,
+                    color: 'white',
+                    borderColor: 'rgba(255,255,255,0.4)',
+                    '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)' }
+                  }}
                 >
-                  Trải nghiệm Trợ lý AI
+                  Luyện tập với AI
                 </Button>
               </Stack>
             </Grid>
-
             <Grid item xs={12} md={5} sx={{ display: { xs: 'none', md: 'block' } }}>
-              <Paper className="glass-card" sx={{ p: 3, borderRadius: 4, transform: 'rotate(2deg)' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                  <AiIcon color="primary" sx={{ fontSize: 40 }} />
-                  <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary' }}>Trợ lý AI Tiếng Anh</Typography>
-                    <Typography variant="caption" color="text.secondary">Sẵn sàng hỗ trợ 24/7</Typography>
-                  </Box>
-                </Box>
-                <Typography variant="body2" color="text.primary" sx={{ p: 2, bgcolor: 'rgba(79,70,229,0.06)', borderRadius: 3, mb: 2 }}>
-                  "I will help you improve your grammar, vocabulary, and practice English quizzes seamlessly!"
-                </Typography>
-                <Button fullWidth variant="contained" color="secondary" onClick={() => navigate('/ai-assistant')}>
-                  Thử ngay miễn phí
-                </Button>
-              </Paper>
+              <Box
+                component="img"
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80"
+                alt="English LMS Students"
+                sx={{
+                  width: '100%',
+                  borderRadius: 6,
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+                  border: '4px solid rgba(255,255,255,0.2)',
+                  transform: 'perspective(1000px) rotateY(-5deg)'
+                }}
+              />
             </Grid>
           </Grid>
         </Container>
@@ -161,13 +166,25 @@ const Home = () => {
           </Button>
         </Box>
 
-        <Grid container spacing={3}>
-          {courses.map((course) => (
-            <Grid item key={course.id} xs={12} sm={6} md={4}>
-              <CourseCard course={course} />
-            </Grid>
-          ))}
-        </Grid>
+        {loading ? (
+          <Box sx={{ py: 6, display: 'flex', justifyContent: 'center' }}>
+            <CircularProgress color="primary" />
+          </Box>
+        ) : courses.length > 0 ? (
+          <Grid container spacing={3}>
+            {courses.map((course) => (
+              <Grid item key={course.id} xs={12} sm={6} md={4}>
+                <CourseCard course={course} />
+              </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <Box sx={{ py: 6, textAlign: 'center' }}>
+            <Typography variant="body1" color="text.secondary">
+              Chưa có khóa học nổi bật nào. Nhấn "Xem tất cả" để khám phá thư viện khóa học.
+            </Typography>
+          </Box>
+        )}
       </Container>
     </Box>
   );
