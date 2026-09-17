@@ -3,7 +3,7 @@ services:
 
   discovery-server:
     build:
-      context: .
+      context: ./backend
       dockerfile: discovery-server/Dockerfile
     container_name: discovery-server
     ports:
@@ -19,7 +19,7 @@ services:
 
   config-server:
     build:
-      context: .
+      context: ./backend
       dockerfile: config-server/Dockerfile
     container_name: config-server
     ports:
@@ -40,7 +40,7 @@ services:
 
   api-gateway:
     build:
-      context: .
+      context: ./backend
       dockerfile: api-gateway/Dockerfile
     container_name: api-gateway
     ports:
@@ -129,7 +129,7 @@ services:
 
   user-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: user-service/Dockerfile
     container_name: user-service
     ports:
@@ -160,7 +160,7 @@ services:
 
   course-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: course-service/Dockerfile
     container_name: course-service
     ports:
@@ -193,7 +193,7 @@ services:
 
   ai-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: ai-service/Dockerfile
     container_name: ai-service
     ports:
@@ -228,7 +228,7 @@ services:
 
   frontend:
     build:
-      context: ../frontend
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: react-app
     ports:
