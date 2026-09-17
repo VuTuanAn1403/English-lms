@@ -1,102 +1,48 @@
-# BÁO CÁO REVIEW VÀ ĐÁNH GIÁ DỰ ÁN (PROJECT REVIEW)
+# BÁO CÁO ĐÁNH GIÁ TỔNG QUAN DỰ ÁN (PROJECT REVIEW)
 
-> **Hệ thống Quản lý Khóa học Tiếng Anh Trực tuyến Tích hợp AI (English LMS)**
-
----
-
-## 1. TỔNG QUAN KẾT QUẢ ĐÃ HOÀN THÀNH
-
-Dự án đã hoàn thành **100% các mục tiêu và yêu cầu** được đặt ra trong các tài liệu kịch bản phát triển (`prompts/01-analyze.md` $\rightarrow$ `prompts/10-review.md`).
-
-### 1.1 Hạ tầng Microservices (Infrastructure Services)
-- **Eureka Discovery Server (Port 8761)**: Cho phép tất cả các dịch vụ đăng ký tự động và phát hiện dịch vụ động qua tên (`user-service`, `course-service`, `ai-service`, `api-gateway`).
-- **Spring Cloud Config Server (Port 8888)**: Quản lý cấu hình tập trung từ `classpath:/config` với native profile, hỗ trợ đổi cấu hình không cần sửa source code.
-- **Spring Cloud API Gateway (Port 8080)**:
-  - Định tuyến thông minh (`lb://user-service`, `lb://course-service`, `lb://ai-service`).
-  - Lớp bảo mật `JwtAuthenticationFilter` phân lọc endpoint công khai và chặn các truy cập trái phép.
-  - Tự động đính kèm thông tin nhận dạng người dùng (`X-User-Email`, `X-User-Role`) chuyển tiếp cho các Microservices phía sau.
-  - Cấu hình CORS toàn cục cho phép React Frontend giao tiếp an toàn.
-  - `LoggingFilter` ghi vết lịch sử các HTTP Request/Response (đã loại bỏ lộ token).
-  - `GlobalExceptionHandler` trả về JSON định dạng chuẩn `{ success, message, data }`.
-
-### 1.2 Các Dịch vụ Nghiệp vụ (Business Microservices)
-- **User Service (Port 8081, Database `user_db`)**:
-  - Quản lý người dùng, phân quyền `ADMIN` và `STUDENT`.
-  - Mã hóa mật khẩu an toàn với `BCryptPasswordEncoder`.
-  - Sinh và xác thực JWT Access Token & Refresh Token.
-  - Quản lý hồ sơ học viên (`getProfile`, `updateProfile`).
-  - Migration cơ sở dữ liệu tự động với Flyway (`V1__create_users.sql`, `V2__insert_admin.sql`).
-- **Course Service (Port 8082, Database `course_db`)**:
-  - Quản lý khóa học tiếng Anh (`Course`), bài học (`Lesson`) và tiến độ đăng ký (`Enrollment`).
-  - Tách biệt cơ sở dữ liệu hoàn toàn, chỉ lưu `userId` dưới dạng UUID để duy trì tính độc lập.
-  - Migration cơ sở dữ liệu với Flyway (`V1__create_courses_tables.sql`, `V2__insert_sample_courses.sql`).
-- **AI Service (Port 8083, Database `ai_db`)**:
-  - Tích hợp Spring AI & Google Gemini API.
-  - **Hỏi đáp AI**: Trả lời bằng tiếng Việt thân thiện, minh họa ví dụ tiếng Anh.
-  - **Sửa lỗi ngữ pháp**: Nhận câu tiếng Anh, trả về JSON gồm câu gốc, câu đã sửa và giải thích tiếng Việt.
-  - **Sinh trắc nghiệm tự động**: Sinh 5 hoặc 10 câu hỏi Multiple Choice có đáp án và giải thích chi tiết.
-  - **Quản lý Prompt riêng**: Đã đóng gói trong `PromptTemplates.java`, tuyệt đối không hard-code trong Controller.
-  - Migration cơ sở dữ liệu với Flyway (`V1__create_ai_tables.sql`).
-
-### 1.3 Giao diện Người dùng (React Frontend - Port 3000)
-- Xây dựng trên React 18, Vite 6, Material UI v6 với font chữ `Plus Jakarta Sans`.
-- **100% Tiếng Việt** giao diện thân thiện, responsive mượt mà trên cả Desktop và Mobile.
-- **Đầy đủ 9 trang**: Trang chủ, Đăng nhập, Đăng ký, Danh sách khóa học, Chi tiết khóa học, Bài học, Hồ sơ cá nhân, Trợ lý AI, Trang 404.
-- Đóng gói Nginx Alpine container đa tầng (Multi-stage Dockerfile).
-
-### 1.4 Đóng gói Container & DevOps
-- Đã tạo Dockerfile cho toàn bộ 7 modules.
-- File `docker-compose.yml` hoàn chỉnh tích hợp **10 Containers** (3 Infrastructure, 3 PostgreSQL Databases, 3 Microservices, 1 React Frontend) có đầy đủ `healthcheck`, `networks`, `volumes` và `environment`.
+> **Báo cáo tổng kết Bài Tập Lớn môn Môi trường và Công cụ Lập trình phần mềm (MSCNPTPM)**  
+> **Dự án**: English LMS - Hệ thống quản lý học tập tiếng Anh tích hợp AI Assistant
 
 ---
 
-## 2. KẾT QUẢ KIỂM THỬ & KIỂM TRA CHẤT LƯỢNG (QUALITY AUDIT)
+## 1. TỔNG QUAN ĐÁNH GIÁ DỰ ÁN
 
-### 2.1 Biên dịch & Đóng gói Maven
-Tất cả các module backend biên dịch thành công 100% với **BUILD SUCCESS**:
-
-```text
-[INFO] Reactor Summary for English LMS - Microservices 1.0.0:
-[INFO] English LMS - Microservices ........................ SUCCESS
-[INFO] Discovery Server ................................... SUCCESS
-[INFO] Config Server ...................................... SUCCESS
-[INFO] API Gateway ........................................ SUCCESS
-[INFO] User Service ....................................... SUCCESS
-[INFO] Course Service ..................................... SUCCESS
-[INFO] AI Service ......................................... SUCCESS
-[INFO] BUILD SUCCESS
-```
-
-### 2.2 Đóng gói Frontend Vite
-Biên dịch thành công không có lỗi linting hay syntax:
-- `npm run build`: Tạo thành công thư mục `dist/` trong `13s`.
-
-### 2.3 Unit Tests
-Tất cả các unit test cho `UserServiceTest`, `CourseServiceTest`, `AiServiceTest` và `JwtUtilTest` đều chạy thành công 100% (Pass: 16/16 tests).
+Dự án English LMS được hoàn thiện theo mô hình Microservices với 6 dịch vụ Java Spring Boot và 1 ứng dụng React Frontend. Hệ thống tập trung giải quyết các bài toán nghiệp vụ học tập cốt lõi, bảo mật định danh người dùng, học thử 5 bài đầu miễn phí, thanh toán mở khóa học và tích hợp Trợ lý AI Assistant.
 
 ---
 
-## 3. ĐÁNH GIÁ MÃ NGUỒN VÀ KIẾN TRÚC
+## 2. NHỮNG ĐIỂM MẠNH ĐÃ ĐƯỢC XÁC MINH (PROVEN STRENGTHS)
 
-| Tiêu chí | Đánh giá | Chi tiết |
-|---|---|---|
-| **Kiến trúc Microservices** | **Xuất sắc** | Tuân thủ triệt để nguyên tắc Database-per-Service. Không gọi chéo DB, giao tiếp duy nhất qua Gateway hoặc REST API. |
-| **Bảo mật & JWT** | **Xuất sắc** | JWT Filter xử lý ở Gateway và nạp Context ở từng Service. Mật khẩu được mã hóa BCrypt. |
-| **Chuẩn Coding Standard** | **Xuất sắc** | Sử dụng MapStruct thay cho tự map thủ công. DTO được dùng 100% trên Controller. Không dùng Field Injection (`@Autowired` trên field). |
-| **Xử lý Ngoại lệ** | **Xuất sắc** | Tất cả các service đều có `GlobalExceptionHandler` trả về chuẩn JSON `ApiResponse<T>`. |
-| **Tài liệu hóa API** | **Xuất sắc** | Tích hợp OpenAPI 3 / Swagger UI trên toàn bộ các service và Gateway kèm nút Authorize. |
-
----
-
-## 4. NHỮNG PHẦN CÓ THỂ MỞ RỘNG TRONG TƯƠNG LAI (FUTURE ROADMAP)
-
-1. **Thanh toán trực tuyến**: Tích hợp VNPAY / Momo cho việc mua khóa học có phí.
-2. **WebSockets / Notification Service**: Thông báo thời gian thực khi học viên hoàn thành khóa học hoặc nhận quà tặng từ AI.
-3. **Phân tích âm thanh (Speech-to-Text & Text-to-Speech)**: Cho phép học viên nói trực tiếp vào mic để AI chấm điểm phát âm tiếng Anh.
-4. **Caching với Redis**: Thêm Redis Cache trên API Gateway và Course Service để tăng tốc độ phản hồi danh sách khóa học.
+1. **Bảo mật và Định danh Chặt chẽ**:
+   - Xác thực qua JWT Token chứa `userId` thật. API Gateway và từng Microservice độc lập giải mã JWT để kiểm tra quyền hạn (`ROLE_STUDENT`, `ROLE_ADMIN`), ngăn chặn hoàn toàn mạo danh header (Header Spoofing).
+2. **Nghiệp vụ Mua khóa học & Học thử Chính xác**:
+   - Cho phép học thử 5 bài đầu miễn phí đối với khóa học trả phí.
+   - Xử lý mở khóa bài 6+ sau khi thanh toán qua VNPay Sandbox / Mock Gateway với cơ chế xử lý callback bất biến (Idempotent).
+3. **Trợ lý AI Đảm bảo Cấu trúc Dữ liệu**:
+   - Xử lý Chat AI giữ nguyên `sessionId`.
+   - Phản hồi Grammar Check tuân thủ JSON 8 trường dữ liệu và Sinh Quiz 4 lựa chọn với chỉ số `correctAnswer` (0..3).
+4. **Kiến trúc Docker Multi-Stage Chạy Trực Tiếp Từ Mã Nguồn**:
+   - `docker compose up --build` tự động biên dịch Maven và Node từ mã nguồn sạch, không phụ thuộc file `.jar` có sẵn trên máy host.
+5. **Độ Tin Cậy Kiểm Thử Cao**:
+   - **65/65 Backend Automated Unit & Security Tests Passed 100%**.
+   - Frontend Production Build đóng gói Vite thành công không lỗi.
 
 ---
 
-## 5. KẾT LUẬN
+## 3. CÁC HẠN CHẾ CÒN TỒN TẠI (EXISTING LIMITATIONS)
 
-Dự án **English LMS** đã đáp ứng hoàn hảo tất cả các yêu cầu đề ra, sẵn sàng cho việc đưa vào vận hành và báo cáo bài tập lớn.
+1. **Cổng thanh toán Sandbox**: Môi trường thanh toán VNPay hiện tại sử dụng ngân hàng thử nghiệm (NCB Sandbox) của cổng VNPay.
+2. **Phụ thuộc API Key bên thứ ba**: Trợ lý AI dựa trên Google Gemini API. Khi vượt quá quota của key cá nhân, hệ thống sẽ chuyển sang cơ chế xử lý lỗi an toàn chứ không thể phản hồi câu trả lời từ AI.
+3. **Phạm vi tính năng**: Không triển khai các tính năng nâng cao nằm ngoài yêu cầu bài tập lớn như RAG / Vector Database / Recommendation Engine.
+
+---
+
+## 4. CHECKLIST DEMO DÀNH CHO GIẢNG VIÊN (DEMO CHECKLIST)
+
+- [x] **Bước 1**: Chạy `docker compose up --build` khởi chạy 10 containers.
+- [x] **Bước 2**: Truy cập http://localhost:3000, đăng ký tài khoản Học viên mới.
+- [x] **Bước 3**: Mở danh sách khóa học, nhấn học thử 5 bài đầu tiên của một khóa học trả phí.
+- [x] **Bước 4**: Thử truy cập bài thứ 6 -> Hệ thống hiển thị Hộp thoại Yêu cầu Mua khóa học (HTTP 403).
+- [x] **Bước 5**: Nhấn Mua khóa học -> Chọn Thanh toán Mock / VNPay -> Hoàn tất thanh toán -> Khóa học được mở khóa toàn bộ.
+- [x] **Bước 6**: Trải nghiệm Chat AI, Sửa lỗi Ngữ pháp (Grammar Check) và Sinh bài tập trắc nghiệm (Quiz Generator).
+- [x] **Bước 7**: Đăng nhập tài khoản Admin (`admin@gmail.com` / `admin123`) -> Xem Báo cáo Doanh thu Admin và Quản lý Đơn hàng.

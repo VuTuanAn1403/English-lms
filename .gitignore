@@ -1,14 +1,33 @@
-# Maven
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Environments
+.env
+.env.*
+!.env.example
 
-# IntelliJ IDEA
+**/.env
+**/.env.*
+!**/.env.example
+
+# Node Dependencies & Build
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+
+# Maven Build
+target/
+**/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE & Editor Files
 .idea/
+**/.idea/
 *.iws
 *.iml
 *.ipr
+.vscode/
+**/.vscode/
 
 # Eclipse
 .apt_generated
@@ -19,23 +38,30 @@ target/
 .springBeans
 .sts4-cache
 
-# VS Code
-.vscode/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
+# Logs & Temporary Files
 *.log
 logs/
+**/logs/
+*.tmp
+*.bak
 
-# Node
-node_modules/
-dist/
-build/
-.env
-.env.local
+# Database Backups & Dumps
+backups/
+*.dump
+*.sql
+!backups/.gitkeep
+
+# Testing & Coverage
+coverage/
+**/coverage/
+performance/*.csv
+!performance/.gitkeep
+tests/results/*
+scratch/
+
+# OS Files
+.DS_Store
+Thumbs.db
 
 # Docker
 .dockerignore

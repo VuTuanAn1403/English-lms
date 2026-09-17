@@ -23,30 +23,8 @@ const Home = () => {
         const res = await api.get('/api/v1/courses');
         setCourses(res.data?.data?.slice(0, 3) || []);
       } catch (err) {
-        // Fallback sample courses if course service not running yet
-        setCourses([
-          {
-            id: '550e8400-e29b-41d4-a716-446655440001',
-            title: 'English Communication - Giao Tiếp Căn Bản',
-            description: 'Khóa học giúp học viên tự tin giao tiếp tiếng Anh trong các tình huống hàng ngày với trợ lý AI hỗ trợ 24/7.',
-            level: 'Cơ bản',
-            imageUrl: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&w=600&q=80'
-          },
-          {
-            id: '550e8400-e29b-41d4-a716-446655440002',
-            title: 'IELTS Foundation 5.5+',
-            description: 'Lộ trình luyện thi IELTS từ cơ bản đến 5.5+ đầy đủ 4 kỹ năng Nghe, Nói, Đọc, Viết kèm trắc nghiệm tự động.',
-            level: 'Trung cấp',
-            imageUrl: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80'
-          },
-          {
-            id: '550e8400-e29b-41d4-a716-446655440003',
-            title: 'Business English - Tiếng Anh Thương Mại',
-            description: 'Kỹ năng viết Email công việc, thuyết trình và đàm phán bằng tiếng Anh chuyên nghiệp cho người đi làm.',
-            level: 'Nâng cao',
-            imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80'
-          }
-        ]);
+        console.error('Failed to load featured courses for homepage:', err);
+        setCourses([]);
       } finally {
         setLoading(false);
       }

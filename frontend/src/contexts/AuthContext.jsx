@@ -34,9 +34,14 @@ export const AuthProvider = ({ children }) => {
       const resData = response.data;
       if (resData.success) {
         const { token: jwtToken, user: userData } = resData.data;
+        
+        // Synchronously persist token and user to localStorage
+        localStorage.setItem('token', jwtToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+
         setToken(jwtToken);
         setUser(userData);
-        return { success: true, message: resData.message };
+        return { success: true, message: resData.message, user: userData };
       } else {
         return { success: false, message: resData.message || 'Đăng nhập thất bại' };
       }
@@ -75,6 +80,7 @@ export const AuthProvider = ({ children }) => {
       const response = await api.put('/api/v1/users/profile', { fullName, avatar });
       const resData = response.data;
       if (resData.success) {
+        localStorage.setItem('user', JSON.stringify(resData.data));
         setUser(resData.data);
         return { success: true, message: resData.message };
       }
@@ -87,8 +93,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const changePassword = async (currentPassword, newPassword, confirmPassword) => {
+    setLoading(true);
+    try {
+      const response = await api.patch('/api/v1/users/me/password', {
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
+      const resData = response.data;
+      return { success: resData.success, message: resData.message || 'Đổi mật khẩu thành công!' };
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Đổi mật khẩu thất bại. Vui lòng kiểm tra lại!';
+      return { success: false, message: msg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateProfile, changePassword }}>
       {children}
     </AuthContext.Provider>
   );

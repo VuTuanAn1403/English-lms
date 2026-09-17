@@ -1,37 +1,25 @@
-# Frontend - React App
+# FRONTEND - WEB APPLICATION (REACT + VITE)
 
-## Mô tả
-Giao diện người dùng sử dụng React + Material UI. Toàn bộ giao diện bằng tiếng Việt.
+## 1. Mô tả
+Ứng dụng Web Client dành cho Học viên và Quản trị viên. Giao diện thiết kế theo ngôn ngữ Material UI (MUI) tiếng Việt, tích hợp AI Assistant Chat, Học thử bài học, Thanh toán đơn hàng và Báo cáo Doanh thu Admin.
 
-## Công nghệ
-- React
-- Material UI
-- Axios
-- React Router
+## 2. Công nghệ & Thư viện
+- **React**: 18.3.1
+- **Vite**: 6.4.3
+- **Material UI**: 6.1.10
+- **Axios**: 1.7.9 (Interceptor xác thực Token JWT & 401 Redirect)
+- **React Router DOM**: 6.28.0
 
-## Cấu trúc (sẽ tạo ở Sprint 5)
-```
-src/
-├── components/
-├── pages/
-├── layouts/
-├── services/
-├── hooks/
-├── contexts/
-├── routes/
-├── utils/
-├── assets/
-└── constants/
-```
-
-## Chạy
+## 3. Lệnh khởi chạy và Đóng gói
 ```bash
-npm install
+# Cài đặt thư viện
+npm ci
+
+# Chạy môi trường phát triển local (Port 5173)
 npm run dev
+
+# Đóng gói sản phẩm Production (dist/)
+npm run build
 ```
 
-## Docker
-```bash
-docker build -t english-lms/frontend .
-docker run -p 3000:3000 english-lms/frontend
-```
+> Hướng dẫn triển khai Docker Compose xem tại [README.md](../README.md).

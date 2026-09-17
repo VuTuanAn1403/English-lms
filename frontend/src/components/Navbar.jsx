@@ -20,7 +20,8 @@ import {
   Person as PersonIcon,
   Logout as LogoutIcon,
   Book as BookIcon,
-  Home as HomeIcon
+  Home as HomeIcon,
+  Bookmark as BookmarkIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -43,6 +44,10 @@ const Navbar = ({ onToggleSidebar }) => {
   const navItems = [
     { label: 'Trang chủ', path: '/', icon: <HomeIcon /> },
     { label: 'Khóa học', path: '/courses', icon: <BookIcon /> },
+    ...(user ? [
+      { label: 'Khóa học của tôi', path: '/my-courses', icon: <BookmarkIcon /> },
+      { label: 'Đơn hàng của tôi', path: '/my-orders', icon: <BookIcon /> }
+    ] : []),
     { label: 'Trợ lý AI', path: '/ai-assistant', icon: <AiIcon /> },
   ];
 
@@ -116,6 +121,10 @@ const Navbar = ({ onToggleSidebar }) => {
                     <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{user.fullName}</Typography>
                     <Typography variant="caption" color="text.secondary">{user.email}</Typography>
                   </Box>
+                  <MenuItem onClick={() => { handleCloseMenu(); navigate('/my-courses'); }}>
+                    <BookmarkIcon fontSize="small" sx={{ mr: 1.5, color: 'text.secondary' }} />
+                    Khóa học của tôi
+                  </MenuItem>
                   <MenuItem onClick={() => { handleCloseMenu(); navigate('/profile'); }}>
                     <PersonIcon fontSize="small" sx={{ mr: 1.5, color: 'text.secondary' }} />
                     Hồ sơ cá nhân

@@ -1,189 +1,177 @@
-# HỆ THỐNG QUẢN LÝ KHÓA HỌC TIẾNG ANH TRỰC TUYẾN TÍCH HỢP TRÍ TUỆ NHÂN TẠO (ENGLISH LMS)
+# ENGLISH LMS - HỆ THỐNG QUẢN LÝ HỌC TẬP TIẾNG ANH TÍCH HỢP AI ASSISTANT
 
-> **Hệ thống Microservices quản lý khóa học tiếng Anh tích hợp Trí tuệ nhân tạo (Google Gemini AI via Spring AI) xây dựng theo chuẩn Spring Cloud & React Material UI.**
-
----
-
-## 1. GIỚI THIỆU DỰ ÁN
-
-**English LMS** là một hệ thống quản lý khóa học tiếng Anh trực tuyến hiện đại. Hệ thống kết hợp giữa việc học trực tuyến qua video/tài liệu bài giảng và khả năng hỗ trợ học tập thông minh từ **Trí tuệ nhân tạo (AI)**:
-- **Hỏi đáp AI**: Giải đáp các thắc mắc về ngữ pháp, từ vựng và giao tiếp tiếng Anh bằng tiếng Việt.
-- **Sửa lỗi ngữ pháp**: Phân tích câu tiếng Anh, tự động sửa lỗi và giải thích nguyên nhân chi tiết.
-- **Sinh bài tập trắc nghiệm**: Tự động khởi tạo bộ câu hỏi trắc nghiệm (Multiple Choice) theo bài học/chủ đề kèm lời giải.
-- **Bảo mật & Phân quyền**: Đăng ký, đăng nhập JWT stateless với phân quyền chi tiết `ADMIN` và `STUDENT`.
+> **Dự án Môi trường và Công cụ Lập trình phần mềm (MSCNPTPM)**  
+> **Kho lưu trữ GitHub chính thức:** [https://github.com/VuTuanAn1403/English-lms](https://github.com/VuTuanAn1403/English-lms)  
+> **Chủ sở hữu mã nguồn:** `@VuTuanAn1403` • **Phiên bản:** `1.2.0` • **Ngày cập nhật:** 17/09/2026  
+> **Mô hình quy trình phát triển:** Thác nước Tuyến tính (Strict Linear Waterfall Lifecycle) tuân thủ ISO/IEC/IEEE 12207, IEEE 730, ISO/IEC 25010 và ISO/IEC/IEEE 29119.  
 
 ---
 
-## 2. KIẾN TRÚC HỆ THỐNG (MICROSERVICES ARCHITECTURE)
+## 📌 1. TỔNG QUAN HỆ THỐNG VÀ ĐỐI TƯỢNG SỬ DỤNG
 
-Hệ thống được thiết kế theo kiến trúc **Microservices với Database-per-Service** sử dụng Spring Cloud:
+### 1.1. Mục tiêu hệ thống
+English LMS là nền tảng quản lý đào tạo trực tuyến hiện đại với kiến trúc Microservices phân tán (Spring Boot 3 + React 18 / Vite 6), tích hợp Trợ lý Trí tuệ Nhân tạo (Google Gemini AI):
+- **Dành cho Học viên (Student):** Tìm kiếm và đăng ký khóa học, học thử miễn phí 5 bài đầu tiên đối với các khóa học có phí, thanh toán qua cổng VNPay/Mock Sandbox, đánh dấu tiến độ hoàn thành, đổi mật khẩu tự phục vụ (FR-06), tương tác luyện tập đàm thoại, kiểm tra sửa lỗi ngữ pháp chi tiết và sinh đề trắc nghiệm thông minh cùng Trợ lý AI.
+- **Dành cho Quản trị viên (Admin):** Quản lý người dùng và phân quyền RBAC, quản lý danh mục khóa học và bài học, theo dõi đơn hàng và báo cáo doanh thu, theo dõi thống kê hệ thống thực tế (FR-21).
 
-```text
-                        ┌─────────────────────────┐
-                        │   React Client (Vite)   │
-                        │      (Port: 3000)       │
-                        └────────────┬────────────┘
-                                     │
-                                     │ HTTP Request
-                                     ▼
-                        ┌─────────────────────────┐
-                        │   Spring Cloud Gateway  │
-                        │      (Port: 8080)       │
-                        └────────────┬────────────┘
-                                     │
-         ┌───────────────────────────┼───────────────────────────┐
-         │                           │                           │
-         v                           v                           v
-┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
-│  User Service   │         │ Course Service  │         │   AI Service    │
-│   (Port: 8081)  │         │   (Port: 8082)  │         │   (Port: 8083)  │
-└────────┬────────┘         └────────┬────────┘         └────────┬────────┘
-         │                           │                           │
-         v                           v                           v
-┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
-│ PostgreSQL User │         │PostgreSQL Course│         │  PostgreSQL AI  │
-│   (user_db)     │         │   (course_db)   │         │    (ai_db)      │
-└─────────────────┘         └─────────────────┘         └─────────────────┘
+### 1.2. Tính năng Trợ lý AI thực tế (AI Feature Scope)
+- **Chat AI Tutor:** Trò chuyện hỏi đáp tiếng Anh trực tiếp, ngữ cảnh duy trì ổn định theo `sessionId`, bảo đảm cách ly dữ liệu cá nhân theo người dùng (Data Privacy).
+- **Grammar Checker:** Phân tích câu/đoạn văn bản tiếng Anh, trả về cấu trúc JSON chuẩn gồm giải thích lỗi, thang điểm ngữ pháp và câu chuẩn hóa theo khung CEFR.
+- **Quiz Generator:** Tự động sinh bộ câu hỏi trắc nghiệm (5 đến 10 câu) kèm 4 lựa chọn, đáp án đúng dạng số nguyên (`0..3`) và lời giải chi tiết.
+- **Prompt Injection Guardrails:** Chỉ thị phòng vệ hệ thống bất biến, ngăn ngừa tiêm prompt làm sai lệch vai trò trợ lý gia sư LMS.
 
-                ┌─────────────────────────────────────────┐
-                │   Eureka Discovery Server (Port: 8761)  │
-                └─────────────────────────────────────────┘
-                ┌─────────────────────────────────────────┐
-                │    Spring Cloud Config Server (8888)    │
-                └─────────────────────────────────────────┘
+---
+
+## 🛠️ 2. CÔNG NGHỆ VÀ KIẾN TRÚC HỆ THỐNG (TECH STACK & ARCHITECTURE)
+
+### 2.1. Ngăn xếp Công nghệ (Tech Stack)
+- **Backend:** Java 21 (OpenJDK / Temurin), Spring Boot `3.4.1`, Spring Cloud `2024.0.0`, Spring Security 6, JJWT `0.12.6`, Spring Data JPA, Flyway Migration.
+- **AI Integration:** Spring AI `1.0.0-M4` (Google Gemini API).
+- **Frontend:** React `18.3.1`, Vite `6.4.3`, Material UI (MUI) `6.1.10`, Axios `1.7.9`, React Router DOM `6.28.0`.
+- **Cơ sở dữ liệu:** PostgreSQL 16 (Mô hình Database-per-Service: `user_db`, `course_db`, `ai_db`).
+- **Triển khai Đám mây & Container:** Vercel (Frontend Hosting với SPA Routing), Docker Compose (Backend Microservices).
+- **Tự động hóa CI/CD:** GitHub Actions (`frontend-ci.yml`, `backend-ci.yml`, `security.yml`).
+
+### 2.2. Kiến trúc Triển khai Lai (Hybrid Deployment)
+```
+[ Trình duyệt Client ] 
+       | 
+       | HTTPS (CDN toàn cầu)
+       v 
+[ Vercel Edge Hosting ] (Frontend React/Vite SPA - vercel.json rewrite)
+       | 
+       | HTTPS REST API
+       v 
+[ Spring Cloud API Gateway (Port 8080) ]
+       |-- Stripping Client X-User-* Headers
+       |-- JWT Verification & Routing
+       +---> [ User Service (8081) ]   <---> PostgreSQL (user_db)
+       +---> [ Course Service (8082) ] <---> PostgreSQL (course_db)
+       +---> [ AI Service (8083) ]     <---> PostgreSQL (ai_db)
 ```
 
 ---
 
-## 3. CÔNG NGHỆ SỬ DỤNG
+## 🚀 3. HƯỚNG DẪN KHỞI CHẠY HỆ THỐNG (LOCAL RUN & DOCKER)
 
-### Backend (Microservices)
-- **Java**: Java 21 LTS
-- **Framework**: Spring Boot 3.5.0, Spring Data JPA, Spring Security
-- **Microservices Infrastructure**: Spring Cloud Gateway, Eureka Server, Spring Cloud Config
-- **AI Integration**: Spring AI `1.0.0`, Google Gemini API
-- **Database & Migration**: PostgreSQL 16, Flyway Database Migration
-- **Tools & Libraries**: MapStruct, Lombok, JJWT (`0.12.6`), SpringDoc OpenAPI 3 / Swagger
-
-### Frontend
-- **Framework**: React 18, Vite 6
-- **UI Component Library**: Material UI v6 (`@mui/material`), Emotion, `@mui/icons-material`
-- **HTTP Client & Router**: Axios, React Router DOM v7
-- **Design Aesthetic**: Glassmorphic UI, Plus Jakarta Sans Font, Responsive 100% Tiếng Việt
-
-### DevOps & Deployment
-- **Containerization**: Docker, Multi-stage Dockerfiles
-- **Orchestration**: Docker Compose (10 Containers)
-- **Web Server**: Nginx Alpine
-
----
-
-## 4. CẤU TRÚC THƯ MỤC DỰ ÁN
-
-```text
-BTL_MSCNPTPM/
-├── docs/                      # Tài liệu thiết kế hệ thống
-├── prompts/                   # Kịch bản các bước phát triển (Prompts 01 -> 10)
-└── english-lms/               # Mã nguồn chính
-    ├── discovery-server/      # Eureka Discovery Server (Port 8761)
-    ├── config-server/         # Spring Cloud Config Server (Port 8888)
-    ├── api-gateway/           # API Gateway - Routing, JWT Filter, CORS (Port 8080)
-    ├── user-service/          # Quản lý Đăng ký, Đăng nhập, JWT, Hồ sơ (Port 8081)
-    ├── course-service/        # Quản lý Khóa học, Bài học, Đăng ký học (Port 8082)
-    ├── ai-service/            # Chat AI, Grammar Checker, Quiz Generator (Port 8083)
-    ├── frontend/              # Giao diện React Material UI (Port 3000)
-    ├── docker-compose.yml     # File khởi chạy 10 Docker Containers
-    ├── pom.xml                # Parent Maven Multi-Module POM
-    ├── PROJECT_REVIEW.md      # Báo cáo đánh giá dự án
-    └── README.md              # Tài liệu hướng dẫn sử dụng
-```
-
----
-
-## 5. HƯỚNG DẪN KHỞI CHẠY HỆ THỐNG
-
-### Cách 1: Khởi chạy bằng Docker Compose (Khuyên dùng)
-
-Yêu cầu: Đã cài đặt **Docker** và **Docker Compose**.
-
+### 3.1. Khởi chạy Backend bằng Docker Compose
+Hệ thống sử dụng Dockerfile multi-stage build, tự động biên dịch trực tiếp trong container từ mã nguồn sạch:
 ```bash
-cd english-lms
+# 1. Sao chép cấu hình môi trường
+cp .env.example .env
 
-# Build và khởi chạy tất cả 10 containers ngầm
-docker compose up -d --build
+# 2. Điền Google Gemini API Key vào file .env (nếu cần dùng AI thật)
+# GEMINI_API_KEY=your_actual_key_here
 
-# Kiểm tra danh sách các container đang chạy
+# 3. Khởi động toàn bộ stack dịch vụ
+docker compose up --build -d
+
+# 4. Kiểm tra sức khỏe toàn hệ thống
 docker compose ps
 ```
 
-### Cách 2: Khởi chạy thủ công từng Service (Local Development)
-
-Yêu cầu: Java 21, Maven 3.9+, Node.js 20+, PostgreSQL running (user_db, course_db, ai_db).
-
+### 3.2. Khởi chạy Frontend cục bộ
 ```bash
-cd english-lms
+cd frontend
+npm ci
+npm run dev
+# Truy cập giao diện tại http://localhost:5173
+```
 
-# 1. Biên dịch toàn bộ Multi-Module Project
-mvn clean install
-
-# 2. Khởi chạy từng dịch vụ theo đúng thứ tự:
-# Terminal 1: Discovery Server
-cd discovery-server && mvn spring-boot:run
-
-# Terminal 2: Config Server
-cd config-server && mvn spring-boot:run
-
-# Terminal 3: API Gateway
-cd api-gateway && mvn spring-boot:run
-
-# Terminal 4: User Service
-cd user-service && mvn spring-boot:run
-
-# Terminal 5: Course Service
-cd course-service && mvn spring-boot:run
-
-# Terminal 6: AI Service
-cd ai-service && mvn spring-boot:run
-
-# Terminal 7: React Frontend
-cd frontend && npm install && npm run dev
+### 3.3. Kiểm tra khói tự động (Smoke Test)
+```powershell
+./scripts/smoke-test.ps1 -GatewayUrl "http://localhost:8080"
 ```
 
 ---
 
-## 6. DANH SÁCH REST API GOVI DÙNG
+## 🌐 4. TRIỂN KHAI FRONTEND LÊN VERCEL (VERCEL DEPLOYMENT)
 
-| Service | Method | Endpoint Path | Quyền truy cập | Mô tả |
-|---|---|---|---|---|
-| **Auth** | `POST` | `/api/v1/auth/register` | Public | Đăng ký tài khoản học viên mới |
-| **Auth** | `POST` | `/api/v1/auth/login` | Public | Đăng nhập & lấy JWT Access Token |
-| **User** | `GET` | `/api/v1/users/profile` | Authenticated | Xem thông tin hồ sơ học viên |
-| **User** | `PUT` | `/api/v1/users/profile` | Authenticated | Cập nhật tên & ảnh đại diện |
-| **Course** | `GET` | `/api/v1/courses` | Public | Danh sách tất cả khóa học |
-| **Course** | `GET` | `/api/v1/courses/{id}` | Public | Chi tiết khóa học theo ID |
-| **Course** | `GET` | `/api/v1/courses/{id}/lessons` | Public | Danh sách bài học của khóa học |
-| **Course** | `POST` | `/api/v1/courses` | ADMIN | Tạo mới khóa học |
-| **Enroll** | `POST` | `/api/v1/enrollments` | Authenticated | Đăng ký tham gia khóa học |
-| **Enroll** | `GET` | `/api/v1/enrollments/my-courses` | Authenticated | Danh sách khóa học đã đăng ký |
-| **AI** | `POST` | `/api/v1/ai/chat` | Authenticated | Hỏi đáp trực tiếp với AI |
-| **AI** | `POST` | `/api/v1/ai/grammar` | Authenticated | Sửa lỗi ngữ pháp & giải thích |
-| **AI** | `POST` | `/api/v1/ai/quiz` | Authenticated | Sinh bài tập trắc nghiệm tự động |
-| **AI** | `GET` | `/api/v1/ai/history` | Authenticated | Xem lịch sử tương tác AI |
+Ứng dụng Frontend sẵn sàng triển khai trên nền tảng đám mây Vercel:
+1. **Root Directory:** `frontend`
+2. **Framework Preset:** `Vite`
+3. **Build Command:** `npm run build` | **Output Directory:** `dist`
+4. **Biến môi trường trên Vercel:**
+   - `VITE_API_BASE_URL`: Điền URL HTTPS công khai của API Gateway (Ví dụ: `https://api.yourdomain.com`).
+   - `VITE_APP_NAME`: `English LMS`.
+5. **Định tuyến SPA:** Tệp [frontend/vercel.json](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/frontend/vercel.json) đã được cấu hình chuyển hướng toàn bộ request về `/index.html`, ngăn ngừa lỗi HTTP 404 khi truy cập deep-link trực tiếp.
+6. Xem chi tiết tại: [docs/VERCEL_DEPLOYMENT.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/VERCEL_DEPLOYMENT.md) và [docs/VERCEL_SMOKE_TEST.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/VERCEL_SMOKE_TEST.md).
 
 ---
 
-## 7. SWAGGER UI & TÀI LIỆU API
+## 🧪 5. KIỂM THỬ VÀ BẢO ĐẢM CHẤT LƯỢNG (TESTING & VERIFICATION)
 
-Mỗi service đều được tích hợp **OpenAPI 3 / Swagger UI** kèm nút **Authorize** để thử nghiệm Bearer Token:
-- **API Gateway**: `http://localhost:8080/swagger-ui.html`
-- **User Service**: `http://localhost:8081/swagger-ui.html`
-- **Course Service**: `http://localhost:8082/swagger-ui.html`
-- **AI Service**: `http://localhost:8083/swagger-ui.html`
-- **Eureka Dashboard**: `http://localhost:8761`
+### 5.1. Kiểm thử Tự động Backend (67 Test Cases - 100% PASS)
+```bash
+# Thực thi toàn bộ test suite trên cả 3 dịch vụ
+mvn clean test
+
+# Hoặc thực thi từng dịch vụ riêng lẻ
+mvn test -pl backend/user-service
+mvn test -pl backend/course-service
+mvn test -pl backend/ai-service
+```
+
+### 5.2. Kiểm thử Đóng gói Frontend
+```bash
+cd frontend
+npm run build
+# Xác nhận bundle dist/index.html được tạo sạch sẽ trong 10s
+```
+
+### 5.3. Kiểm thử Tải Hiệu năng Apache JMeter
+- Mở tệp kịch bản [performance/english-lms-performance.jmx](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/performance/english-lms-performance.jmx) bằng Apache JMeter 5.6.3.
+- Thực thi kịch bản đo tải đồng thời 20 threads.
+- Kết quả đo lường: Thời gian phản hồi trung bình API CRUD < 350ms, thời gian p95 < 560ms (Đạt chuẩn NFR-03: < 2.0 giây).
 
 ---
 
-## 8. THÀNH VIÊN NHÓM THỰC HIỆN
+## 💾 6. SAO LƯU VÀ PHỤC HỒI DỮ LIỆU (BACKUP & RECOVERY)
 
-- **Đề tài**: Xây dựng hệ thống quản lý khóa học tiếng Anh trực tuyến tích hợp trí tuệ nhân tạo theo kiến trúc Microservice.
-- **Học phần**: Bài tập lớn Môi trường & Thiết kế phần mềm.
+Hệ thống cung cấp sẵn các kịch bản PowerShell tự động hóa sao lưu và khôi phục cơ sở dữ liệu:
+- **Sao lưu toàn bộ 3 database (`user_db`, `course_db`, `ai_db`):**
+  ```powershell
+  ./scripts/backup-db.ps1
+  ```
+- **Khôi phục dữ liệu lên môi trường đích kèm kiểm tra toàn vẹn sandbox:**
+  ```powershell
+  ./scripts/restore-db.ps1 -BackupDir "./backups" -VerifySandbox
+  ```
+- Chi tiết hướng dẫn xem tại: [docs/backup-restore.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/backup-restore.md).
+
+---
+
+## 📚 7. HỆ THỐNG HỒ SƠ QUY TRÌNH THÁC NƯỚC (WATERFALL DOCUMENTATION DIRECTORY)
+
+Toàn bộ tài liệu kỹ thuật được phân loại theo các tiêu chuẩn quốc tế ISO/IEC/IEEE:
+- [docs/01-baseline-audit.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/01-baseline-audit.md): Báo cáo kiểm toán hiện trạng hệ thống.
+- [docs/REQUIREMENTS_BASELINE.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/REQUIREMENTS_BASELINE.md): Baseline 21 FR và 10 NFR kèm định nghĩa số liệu FR-21.
+- [docs/TRACEABILITY_MATRIX.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/TRACEABILITY_MATRIX.md): Ma trận truy vết yêu cầu từ đầu đến cuối.
+- [docs/02-analysis.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/02-analysis.md): Phân tích Use Cases và sơ đồ tuần tự.
+- [docs/02-architecture.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/02-architecture.md): Kiến trúc microservices và vai trò Vercel.
+- [docs/03-database-design.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/03-database-design.md): Thiết kế cơ sở dữ liệu, ràng buộc và Flyway.
+- [docs/04-api.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/04-api.md): Đặc tả hợp đồng API đồng bộ với mã nguồn thực tế.
+- [docs/06-quality-plan.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/06-quality-plan.md): Kế hoạch bảo đảm chất lượng theo IEEE 730 và ISO/IEC 25010.
+- [docs/07-waterfall-gates.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/07-waterfall-gates.md): Tiêu chí đóng 7 Cổng giai đoạn Stage Gates.
+- [docs/08-development-plan.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/08-development-plan.md): Kế hoạch phát triển theo mô hình Thác nước.
+- [docs/09-testing.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/09-testing.md): Kế hoạch kiểm thử theo ISO/IEC/IEEE 29119.
+- [docs/test-cases.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/test-cases.md): Danh mục kịch bản kiểm thử chi tiết.
+- [docs/TEST_RESULTS.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/TEST_RESULTS.md): Kết quả kiểm thử thực tế và Nhật ký lỗi (Defect Log).
+- [docs/RESPONSIVE_VERIFICATION.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/RESPONSIVE_VERIFICATION.md): Báo cáo xác minh hiển thị responsive 3 viewports.
+- [docs/10-deployment.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/10-deployment.md): Hướng dẫn triển khai Docker và Vercel.
+- [docs/GITHUB_SOURCE_CONTROL.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/GITHUB_SOURCE_CONTROL.md): Quy chuẩn quản lý mã nguồn GitHub.
+- [docs/GITHUB_CI_CD.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/GITHUB_CI_CD.md): Đặc tả quy trình tự động hóa GitHub Actions.
+- [docs/RELEASE_PROCESS.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/RELEASE_PROCESS.md): Quy trình phát hành phiên bản.
+- [docs/ROLLBACK.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/ROLLBACK.md): Quy trình thu hồi khẩn cấp khi phát sinh sự cố.
+- [docs/QA_INDEX.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/QA_INDEX.md): Mục lục tra cứu toàn bộ hồ sơ chất lượng.
+- [docs/FINAL_ACCEPTANCE.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/docs/FINAL_ACCEPTANCE.md): Báo cáo nghiệm thu kỹ thuật cuối cùng.
+- [RELEASE_NOTES.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/RELEASE_NOTES.md) & [CHANGELOG.md](file:///c:/Users/ASUS/BTL_MSCNPTPM/english-lms/CHANGELOG.md): Ghi chú phát hành và lịch sử phiên bản.
+
+---
+
+## 🔑 8. TÀI KHOẢN TRẢI NGHIỆM HỆ THỐNG (DEMO SEED ACCOUNTS)
+
+| Vai trò (Role) | Email | Mật khẩu mặc định | Mục đích sử dụng |
+| :--- | :--- | :--- | :--- |
+| **Quản trị viên (ADMIN)** | `admin@gmail.com` | `admin123` | Quản lý người dùng, khóa học, thống kê hệ thống |
+| **Học viên (STUDENT)** | `student@gmail.com` | `password123` | Đăng ký khóa học, học bài, đổi mật khẩu, tương tác Trợ lý AI |

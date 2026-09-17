@@ -1,0 +1,20 @@
+# ==============================================================================
+# GitHub Code Owners Configuration (English LMS)
+# Syntax: <path> <owners>
+# ==============================================================================
+
+# Global repository maintainers
+*                   @VuTuanAn1403
+
+# Frontend team / React maintainers
+/frontend/          @VuTuanAn1403
+
+# Backend Microservices & Spring Boot maintainers
+/backend/           @VuTuanAn1403
+
+# CI/CD Workflows & DevOps configuration
+/.github/           @VuTuanAn1403
+/scripts/           @VuTuanAn1403
+
+# Documentation & Waterfall quality specifications
+/docs/              @VuTuanAn1403

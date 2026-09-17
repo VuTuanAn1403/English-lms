@@ -1,0 +1,6 @@
+# Ignore generated test output logs
+*.log
+*.xml
+*.json
+!TEST_REPORT.md
+!.gitkeep

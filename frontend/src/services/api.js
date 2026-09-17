@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// Interceptor tự động đính kèm JWT Bearer Token vào Request
+// Request Interceptor: Attach JWT Bearer Token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -21,16 +21,21 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor xử lý phản hồi lỗi tập trung
+// Response Interceptor: Handle 401 Unauthorized globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Nếu hết hạn token hoặc chưa đăng nhập, tự động xóa localStorage
-      const isAuthRequest = error.config.url.includes('/auth/login') || error.config.url.includes('/auth/register');
-      if (!isAuthRequest) {
+      const isAuthPath = error.config.url.includes('/auth/login') ||
+        error.config.url.includes('/auth/register') ||
+        error.config.url.includes('/user/login');
+
+      if (!isAuthPath) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/admin/login')) {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);
