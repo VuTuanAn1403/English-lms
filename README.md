@@ -1,8 +1,5 @@
 # ENGLISH LMS - HỆ THỐNG QUẢN LÝ HỌC TẬP TIẾNG ANH TÍCH HỢP AI ASSISTANT
 
-> **Dự án Môi trường và Công cụ Lập trình phần mềm (MSCNPTPM)**  
-> **Kho lưu trữ GitHub chính thức:** [https://github.com/VuTuanAn1403/English-lms](https://github.com/VuTuanAn1403/English-lms)  
-> **Chủ sở hữu mã nguồn:** `@VuTuanAn1403` • **Phiên bản:** `1.2.0` • **Ngày cập nhật:** 17/09/2026  
 > **Mô hình quy trình phát triển:** Thác nước Tuyến tính (Strict Linear Waterfall Lifecycle) tuân thủ ISO/IEC/IEEE 12207, IEEE 730, ISO/IEC 25010 và ISO/IEC/IEEE 29119.  
 
 ---
