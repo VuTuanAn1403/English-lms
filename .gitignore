@@ -1,0 +1,67 @@
+# Environments
+.env
+.env.*
+!.env.example
+
+**/.env
+**/.env.*
+!**/.env.example
+
+# Node Dependencies & Build
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+
+# Maven Build
+target/
+**/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE & Editor Files
+.idea/
+**/.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+**/.vscode/
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# Logs & Temporary Files
+*.log
+logs/
+**/logs/
+*.tmp
+*.bak
+
+# Database Backups & Dumps
+backups/
+*.dump
+*.sql
+!backups/.gitkeep
+
+# Testing & Coverage
+coverage/
+**/coverage/
+performance/*.csv
+!performance/.gitkeep
+tests/results/*
+scratch/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore

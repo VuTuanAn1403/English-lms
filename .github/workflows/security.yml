@@ -1,0 +1,33 @@
+name: Security & Secret Hygiene CI
+
+on:
+  push:
+    branches: [ main, master, develop, 'feature/**' ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    name: Secret & Hygiene Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Scan for committed sensitive .env files
+        run: |
+          echo "Scanning for accidentally committed .env files..."
+          if find . -maxdepth 3 -name ".env" ! -name "*.example" | grep -q .; then
+            echo "ERROR: Unmasked .env file detected in repository tree!"
+            find . -maxdepth 3 -name ".env" ! -name "*.example"
+            exit 1
+          fi
+          echo "No raw .env files found in repository tree."
+
+      - name: Audit Frontend Dependencies
+        working-directory: frontend
+        run: |
+          npm audit --audit-level=high || true

@@ -1,0 +1,20 @@
+# User Service Configuration (served by Config Server)
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+
+jwt:
+  secret: ${JWT_SECRET:english-lms-jwt-secret-key-must-be-at-least-256-bits-long-for-security}
+  expiration: 86400000
